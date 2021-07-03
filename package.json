@@ -1,0 +1,26 @@
+{
+  "name": "tex-ast",
+  "version": "0.0.1",
+  "description": "Shunting yard algorithm to parse LaTeX mathematics",
+  "main": "index.js",
+  "scripts": {
+    "test": "jest"
+  },
+  "keywords": [
+    "tex",
+    "latex",
+    "parse",
+    "parser",
+    "mathematics",
+    "shunting",
+    "yard"
+  ],
+  "author": "Matthew Burke",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/jest": "^26.0.23",
+    "jest": "^27.0.6",
+    "ts-jest": "^27.0.3",
+    "typescript": "^4.3.5"
+  }
+}
