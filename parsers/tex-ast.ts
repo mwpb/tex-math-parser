@@ -1,67 +1,147 @@
-export type AST = { op: string; args: AST[] };
 export type ParseError = { tag: "error"; message: string };
 export type ParseResult = AST | ParseError;
 
-export let initAST = {
-  op: "const",
-  args: [],
-  parent: null,
+type Atom = number;
+type UnarySubtraction = {
+  tag: "unary_subtraction";
+  right: AST;
 };
-export let constAST = (x: string): AST => {
-  return { op: x, args: [] };
+type BinaryAddition = {
+  tag: "binary_addition";
+  left: AST;
+  right: AST;
+};
+type BinaryMultiplication = {
+  tag: "binary_multiplication";
+  left: AST;
+  right: AST;
+};
+type UnaryOperator = UnarySubtraction;
+type BinaryOperator = BinaryAddition | BinaryMultiplication;
+export type AST = Atom | UnaryOperator | BinaryOperator;
+
+let assertUnreachable = (x: never): never => {
+  throw new Error(`Error in case analysis: ${x}.`);
+};
+
+let getSymbol = (ast: AST): string => {
+  if (typeof ast === "number") return " ";
+  if (ast.tag === "unary_subtraction") return "-";
+  if (ast.tag === "binary_addition") return "+";
+  if (ast.tag === "binary_multiplication") return "*";
+
+  return assertUnreachable(ast);
 };
 
 let operatorPrecedence = new Map<string, number>();
-operatorPrecedence.set("const", 10);
+operatorPrecedence.set(" ", 10);
 operatorPrecedence.set("+", 20);
+operatorPrecedence.set("-", 20);
 operatorPrecedence.set("*", 30);
 
-export let parse = (s: string): AST => {
-  let root = constAST("root");
-  let searchPath: AST[] = [root];
+let unaryOperators = new Map<string, number>();
+unaryOperators.set("-", 20);
+unaryOperators.set("+", 20);
 
-  while (searchPath.length > 0 && s.length > 0) {
-    // console.log(`step: ${JSON.stringify(searchPath)} ${s}`);
-
-    let [token, rest] = getToken(s);
-    let ast = searchPath[searchPath.length - 1];
-
-    if (token >= "0" && token <= "9") {
-      ast.args.push(constAST(token));
-      s = rest;
-      continue;
-    }
-
-    if (operatorPrecedence.has(token)) {
-      let currentPrecedence = operatorPrecedence.get(ast.op) ?? 0;
-      let tokenPrecedence = operatorPrecedence.get(token) ?? 0;
-      if (tokenPrecedence < currentPrecedence) {
-        searchPath.pop();
-        continue;
-      } else if (tokenPrecedence === currentPrecedence) {
-        // Assuming equal precedence implies same op (not in general true.)
-        s = rest;
-        continue;
-      } else if (ast.args.length > 0) {
-        let oldLastAst = {...ast.args[ast.args.length - 1]};
-        ast.args[ast.args.length - 1].op = token;
-        ast.args[ast.args.length - 1].args = [oldLastAst];
-        searchPath.push(ast.args[ast.args.length - 1]);
-        s = rest;
-        continue;
-      } else {
-        let oldAst = { ...ast };
-        ast.op = token;
-        ast.args = [oldAst];
-        s = rest;
-        continue;
-      }
-    }
+export let parse = (s: string): AST | null => {
+  let [left, rest] = parseOnce(null, " ", s);
+  while (rest.length > 0) {
+    [left, rest] = parseOnce(left, " ", rest);
   }
 
-  console.log(JSON.stringify(root));
+  return left;
+};
 
-  return root;
+let parseAtom = (s: string): [Atom | null, string] => {
+  // console.log(`parse atom ${s}`);
+  let token = s[0];
+  if (token >= "0" && token <= "9") {
+    return [Number.parseInt(s), s.slice(1)];
+  }
+
+  return [null, s];
+};
+
+let parseUnaryPrefix = (s: string): [UnaryOperator | null, string] => {
+  // console.log(`parse unary ${s}`);
+  if (s.startsWith("-")) {
+    let [ast, rest] = parseOnce(null, "-", s.slice(1));
+    if (!ast) throw new Error(`Error getting rhs of unary: ${s}`);
+    return [
+      {
+        tag: "unary_subtraction",
+        right: ast,
+      },
+      rest,
+    ];
+  }
+
+  return [null, s];
+};
+
+let parseInfix = (
+  left: AST,
+  operator: string,
+  s: string
+): [AST | null, string, string] => {
+  // console.log(`parse infix ${JSON.stringify(left)}, ${operator}, ${s}`);
+  let currentPrecedence = operatorPrecedence.get(operator) ?? 0;
+  let tokenPrecedence = operatorPrecedence.get(s[0]) ?? 0;
+  if (tokenPrecedence <= currentPrecedence) {
+    return [left, " ", s];
+  }
+
+  if (s.startsWith("+")) {
+    let [right, rest] = parseOnce(null, "+", s.slice(1));
+    if (!right) throw new Error(`Error parsing rhs of binary +: ${s}`);
+    return [
+      {
+        tag: "binary_addition",
+        left: left,
+        right: right,
+      },
+      " ",
+      rest,
+    ];
+  }
+
+  if (s.startsWith("*")) {
+    let [right, rest] = parseOnce(null, "*", s.slice(1));
+
+    if (!right) throw new Error(`Error parsing rhs of binary *: ${s}`);
+    return [
+      {
+        tag: "binary_multiplication",
+        left: left,
+        right: right,
+      },
+      " ",
+      rest,
+    ];
+  }
+
+  return [null, " ", ""];
+};
+
+let parseOnce = (
+  left: AST | null,
+  operator: string,
+  rest: string
+): [AST | null, string] => {
+  if (rest.length === 0) return [left, rest];
+  if (!left) { // ensures infix not treated as prefix
+    if (rest.length == 0) throw new Error("Unexpected end of input.");
+    [left, rest] = parseAtom(rest);
+    if (!left) [left, rest] = parseUnaryPrefix(rest);
+    if (!left) throw new Error(`Doesn't start with atom or prefix: ${rest}`);
+
+    return parseOnce(left, operator, rest);
+  }
+
+  if (left) [left, operator, rest] = parseInfix(left, operator, rest);
+  if (!left) throw new Error(`Expected infix: ${rest}`);
+
+  return [left, rest];
 };
 
 let getToken = (s: string): [string, string] => {
