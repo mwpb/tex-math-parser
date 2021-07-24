@@ -1,47 +1,13 @@
-export type ParseError = { tag: "error"; message: string };
-export type ParseResult = AST | ParseError;
-
-type Atom = number;
-type UnarySubtraction = {
-  tag: "unary_subtraction";
-  right: AST;
-};
-type BinaryAddition = {
-  tag: "binary_addition";
-  left: AST;
-  right: AST;
-};
-type BinaryMultiplication = {
-  tag: "binary_multiplication";
-  left: AST;
-  right: AST;
-};
-type UnaryOperator = UnarySubtraction;
-type BinaryOperator = BinaryAddition | BinaryMultiplication;
-export type AST = Atom | UnaryOperator | BinaryOperator;
-
-let assertUnreachable = (x: never): never => {
-  throw new Error(`Error in case analysis: ${x}.`);
-};
-
-let getSymbol = (ast: AST): string => {
-  if (typeof ast === "number") return " ";
-  if (ast.tag === "unary_subtraction") return "-";
-  if (ast.tag === "binary_addition") return "+";
-  if (ast.tag === "binary_multiplication") return "*";
-
-  return assertUnreachable(ast);
-};
-
-let operatorPrecedence = new Map<string, number>();
-operatorPrecedence.set(" ", 10);
-operatorPrecedence.set("+", 20);
-operatorPrecedence.set("-", 20);
-operatorPrecedence.set("*", 30);
-
-let unaryOperators = new Map<string, number>();
-unaryOperators.set("-", 20);
-unaryOperators.set("+", 20);
+import {
+  AST,
+  Atom,
+  binaryInfixSchema,
+  BinaryNode,
+  binaryPrefixSchema,
+  UnaryNode,
+  unaryOperatorSchema,
+} from "./ast";
+import { operatorPrecedence } from "./precedence";
 
 export let parse = (s: string): AST | null => {
   let [left, rest] = parseOnce(null, " ", s);
@@ -56,24 +22,43 @@ let parseAtom = (s: string): [Atom | null, string] => {
   // console.log(`parse atom ${s}`);
   let token = s[0];
   if (token >= "0" && token <= "9") {
-    return [Number.parseInt(s), s.slice(1)];
+    return [Number.parseInt(s[0]), s.slice(1)];
   }
 
   return [null, s];
 };
 
-let parseUnaryPrefix = (s: string): [UnaryOperator | null, string] => {
+let eat = (char: string, s: string): string => {
+  if (char === s[0]) return s.slice(1);
+  return s;
+};
+
+let parseUnaryPrefix = (s: string): [UnaryNode | null, string] => {
   // console.log(`parse unary ${s}`);
-  if (s.startsWith("-")) {
-    let [ast, rest] = parseOnce(null, "-", s.slice(1));
+  let token = s.charAt(0);
+  if (unaryOperatorSchema.guard(token)) {
+    let [ast, rest] = parseOnce(null, token, s.slice(1));
     if (!ast) throw new Error(`Error getting rhs of unary: ${s}`);
-    return [
-      {
-        tag: "unary_subtraction",
-        right: ast,
-      },
-      rest,
-    ];
+    return [{ op: token, right: ast }, rest];
+  }
+
+  return [null, s];
+};
+
+let parseBinaryPrefix = (s: string): [BinaryNode | null, string] => {
+  let token = s.charAt(0);
+  if (binaryPrefixSchema.guard(token)) {
+    let [left, rest] = parseOnce(null, token, s.slice(1));
+    if (!left) throw new Error(`Error getting lhs of binary prefix: ${s}`);
+
+    // should move whitespace into parse??
+    rest = eat(",", rest);
+    rest = eat(" ", rest);
+
+    let [right, newRest] = parseOnce(null, token, rest);
+    if (!right) throw new Error(`Error getting rhs of binary prefix: ${s}`);
+
+    return [{ op: token, left: left, right: right }, newRest];
   }
 
   return [null, s];
@@ -85,39 +70,17 @@ let parseInfix = (
   s: string
 ): [AST | null, string, string] => {
   // console.log(`parse infix ${JSON.stringify(left)}, ${operator}, ${s}`);
+  let token = s.charAt(0);
   let currentPrecedence = operatorPrecedence.get(operator) ?? 0;
-  let tokenPrecedence = operatorPrecedence.get(s[0]) ?? 0;
+  let tokenPrecedence = operatorPrecedence.get(token) ?? 0;
   if (tokenPrecedence <= currentPrecedence) {
-    return [left, " ", s];
+    return [left, " ", s]; // use " " because we want token to bind next
   }
 
-  if (s.startsWith("+")) {
-    let [right, rest] = parseOnce(null, "+", s.slice(1));
-    if (!right) throw new Error(`Error parsing rhs of binary +: ${s}`);
-    return [
-      {
-        tag: "binary_addition",
-        left: left,
-        right: right,
-      },
-      " ",
-      rest,
-    ];
-  }
-
-  if (s.startsWith("*")) {
-    let [right, rest] = parseOnce(null, "*", s.slice(1));
-
-    if (!right) throw new Error(`Error parsing rhs of binary *: ${s}`);
-    return [
-      {
-        tag: "binary_multiplication",
-        left: left,
-        right: right,
-      },
-      " ",
-      rest,
-    ];
+  if (binaryInfixSchema.guard(token)) {
+    let [right, rest] = parseOnce(null, token, s.slice(1));
+    if (!right) throw new Error(`Error parsing rhs of binary ${token}: ${s}`);
+    return [{ op: token, left: left, right: right }, " ", rest];
   }
 
   return [null, " ", ""];
@@ -128,22 +91,27 @@ let parseOnce = (
   operator: string,
   rest: string
 ): [AST | null, string] => {
+  // console.log(`parse once ${JSON.stringify(left)} ${operator} ${rest}`);
+
   if (rest.length === 0) return [left, rest];
-  if (!left) { // ensures infix not treated as prefix
+  if (!left) {
+    // ensures infix not treated as prefix
     if (rest.length == 0) throw new Error("Unexpected end of input.");
+    if (rest.startsWith("(")) return parseOnce(left, "(", rest.slice(1));
+    // console.log(`before atom: ${left}`);
     [left, rest] = parseAtom(rest);
+    // console.log(`after atom: ${left}`);
     if (!left) [left, rest] = parseUnaryPrefix(rest);
+    if (!left) [left, rest] = parseBinaryPrefix(rest);
     if (!left) throw new Error(`Doesn't start with atom or prefix: ${rest}`);
 
     return parseOnce(left, operator, rest);
   }
 
+  if (rest.startsWith(")")) return [left, rest.slice(1)];
   if (left) [left, operator, rest] = parseInfix(left, operator, rest);
-  if (!left) throw new Error(`Expected infix: ${rest}`);
+
+  if (!left) throw new Error(`Expected infix or delimiter: ${rest}`);
 
   return [left, rest];
-};
-
-let getToken = (s: string): [string, string] => {
-  return [s.charAt(0), s.slice(1)];
 };
