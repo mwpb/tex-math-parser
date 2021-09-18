@@ -1,6 +1,6 @@
 import { Literal, Static, Union } from "runtypes";
 
-export type Atom = number;
+export type Atom = number | string;
 
 export const unaryOperatorSchema = Union(Literal("+"), Literal("-"));
 export type UnaryOperator = Static<typeof unaryOperatorSchema>;

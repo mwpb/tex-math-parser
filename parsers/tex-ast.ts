@@ -29,9 +29,12 @@ export let parse = (s: string): AST | null => {
 
 let parseAtom = (s: Token[]): [Atom | null, Token[]] => {
   // console.log(`parse atom ${s}`);
-  let token = s[0].value;
-  if (token >= "0" && token <= "9") {
-    return [Number.parseInt(s[0].value), s.slice(1)];
+  let token = s[0];
+  if (token.type === "number") {
+    return [Number.parseInt(token.value), s.slice(1)];
+  }
+  if (token.type === "symbol") {
+    return [token.value, s.slice(1)]
   }
 
   return [null, s];

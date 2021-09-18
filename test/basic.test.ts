@@ -78,6 +78,14 @@ test("init", () => {
     ],
     ["f(2)(3)", { op: "f", left: 2, right: 3 }],
     ["f(2, 3)", { op: "f", left: 2, right: 3 }],
+    [
+      "\\Delta*(\\alpha+\\beta)",
+      {
+        op: "*",
+        left: "\\Delta",
+        right: { op: "+", left: "\\alpha", right: "\\beta" },
+      },
+    ],
   ];
 
   for (let [input, output] of table) {
