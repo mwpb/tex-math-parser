@@ -6,7 +6,7 @@ export const unaryOperatorSchema = Union(Literal("+"), Literal("-"));
 export type UnaryOperator = Static<typeof unaryOperatorSchema>;
 
 export type UnaryNode = {
-  op: UnaryOperator;
+  op: string;
   right: AST;
 };
 
@@ -19,7 +19,7 @@ export const binaryInfixSchema = Union(
 export const binaryOperatorSchema = binaryPrefixSchema.Or(binaryInfixSchema);
 export type BinaryOperator = Static<typeof binaryOperatorSchema>;
 export type BinaryNode = {
-  op: BinaryOperator;
+  op: string;
   left: AST;
   right: AST;
 };

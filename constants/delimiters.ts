@@ -1,25 +1,27 @@
-export const leftDelimiters = new Set<string>();
-leftDelimiters.add("{");
-leftDelimiters.add("|");
-leftDelimiters.add("\\|");
-leftDelimiters.add("(");
-leftDelimiters.add("\\{");
-leftDelimiters.add("\\lceil");
-leftDelimiters.add("\\ulcorner");
-leftDelimiters.add("[");
-leftDelimiters.add("\\langle");
-leftDelimiters.add("\\lfloor");
-leftDelimiters.add("\\llcorner");
+export const leftDelimiters = [
+  "{",
+  "|",
+  "\\|",
+  "(",
+  "\\{",
+  "\\lceil",
+  "\\ulcorner",
+  "[",
+  "\\langle",
+  "\\lfloor",
+  "\\llcorner",
+];
 
-export const rightDelimiters = new Set<string>();
-rightDelimiters.add("}");
-rightDelimiters.add("|");
-rightDelimiters.add("\\|");
-rightDelimiters.add(")");
-rightDelimiters.add("\\}");
-rightDelimiters.add("\\rceil");
-rightDelimiters.add("\\urcorner");
-rightDelimiters.add("]");
-rightDelimiters.add("\\rangle");
-rightDelimiters.add("\\rfloor");
-rightDelimiters.add("lrcorner");
+export const rightDelimiters = [
+  "}",
+  "|",
+  "\\|",
+  ")",
+  "\\}",
+  "\\rceil",
+  "\\urcorner",
+  "]",
+  "\\rangle",
+  "\\rfloor",
+  "lrcorner",
+];

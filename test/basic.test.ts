@@ -86,6 +86,14 @@ test("init", () => {
         right: { op: "+", left: "\\alpha", right: "\\beta" },
       },
     ],
+    [
+      "2*(3+1}",
+      {
+        op: "*",
+        left: 2,
+        right: { op: "+", left: 3, right: 1 },
+      },
+    ],
   ];
 
   for (let [input, output] of table) {

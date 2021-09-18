@@ -1,58 +1,59 @@
-export let greekLetters = new Set<string>();
-greekLetters.add("\\Alpha");
-greekLetters.add("\\alpha");
-greekLetters.add("\\Beta");
-greekLetters.add("\\beta");
-greekLetters.add("\\Gamma");
-greekLetters.add("\\gamma");
-greekLetters.add("\\Delta");
-greekLetters.add("\\delta");
-greekLetters.add("\\Epsilon");
-greekLetters.add("\\epsilon");
-greekLetters.add("\\varepsilon");
-greekLetters.add("\\Zeta");
-greekLetters.add("\\zeta");
-greekLetters.add("\\Eta");
-greekLetters.add("\\eta");
-greekLetters.add("\\Theta");
-greekLetters.add("\\theta");
-greekLetters.add("\\vartheta");
-greekLetters.add("\\Iota");
-greekLetters.add("\\iota");
-greekLetters.add("\\Kappa");
-greekLetters.add("\\kappa");
-greekLetters.add("\\varkappa");
-greekLetters.add("\\Lambda");
-greekLetters.add("\\lambda");
-greekLetters.add("\\Mu");
-greekLetters.add("\\mu");
-greekLetters.add("\\Nu");
-greekLetters.add("\\nu");
-greekLetters.add("\\Xi");
-greekLetters.add("\\xi");
-greekLetters.add("\\Omicron");
-greekLetters.add("\\omicron");
-greekLetters.add("\\Pi");
-greekLetters.add("\\pi");
-greekLetters.add("\\varpi");
-greekLetters.add("\\Rho");
-greekLetters.add("\\rho");
-greekLetters.add("\\varrho");
-greekLetters.add("\\Sigma");
-greekLetters.add("\\sigma");
-greekLetters.add("\\varsigma");
-greekLetters.add("\\Tau");
-greekLetters.add("\\tau");
-greekLetters.add("\\Upsilon");
-greekLetters.add("\\upsilon");
-greekLetters.add("\\Phi");
-greekLetters.add("\\phi");
-greekLetters.add("\\varphi");
-greekLetters.add("\\Chi");
-greekLetters.add("\\chi");
-greekLetters.add("\\Psi");
-greekLetters.add("\\psi");
-greekLetters.add("\\Omega");
-greekLetters.add("\\omega");
-greekLetters.add("\\Digamma");
-greekLetters.add("\\digamma");
+export let greekLetters = [
+  "\\Alpha",
+  "\\alpha",
+  "\\Beta",
+  "\\beta",
+  "\\Gamma",
+  "\\gamma",
+  "\\Delta",
+  "\\delta",
+  "\\Epsilon",
+  "\\epsilon",
+  "\\varepsilon",
+  "\\Zeta",
+  "\\zeta",
+  "\\Eta",
+  "\\eta",
+  "\\Theta",
+  "\\theta",
+  "\\vartheta",
+  "\\Iota",
+  "\\iota",
+  "\\Kappa",
+  "\\kappa",
+  "\\varkappa",
+  "\\Lambda",
+  "\\lambda",
+  "\\Mu",
+  "\\mu",
+  "\\Nu",
+  "\\nu",
+  "\\Xi",
+  "\\xi",
+  "\\Omicron",
+  "\\omicron",
+  "\\Pi",
+  "\\pi",
+  "\\varpi",
+  "\\Rho",
+  "\\rho",
+  "\\varrho",
+  "\\Sigma",
+  "\\sigma",
+  "\\varsigma",
+  "\\Tau",
+  "\\tau",
+  "\\Upsilon",
+  "\\upsilon",
+  "\\Phi",
+  "\\phi",
+  "\\varphi",
+  "\\Chi",
+  "\\chi",
+  "\\Psi",
+  "\\psi",
+  "\\Omega",
+  "\\omega",
+  "\\Digamma",
+  "\\digamma",
+];

@@ -34,7 +34,7 @@ let parseAtom = (s: Token[]): [Atom | null, Token[]] => {
     return [Number.parseInt(token.value), s.slice(1)];
   }
   if (token.type === "symbol") {
-    return [token.value, s.slice(1)]
+    return [token.value, s.slice(1)];
   }
 
   return [null, s];
@@ -47,11 +47,11 @@ let parseAtom = (s: Token[]): [Atom | null, Token[]] => {
 
 let parseUnaryPrefix = (s: Token[]): [UnaryNode | null, Token[]] => {
   // console.log(`parse unary ${s}`);
-  let token = s[0].value;
-  if (unaryOperatorSchema.guard(token)) {
-    let [ast, rest] = parseOnce(null, token, s.slice(1));
+  let token = s[0];
+  if (token.type === "unaryOperator") {
+    let [ast, rest] = parseOnce(null, token.value, s.slice(1));
     if (!ast) throw new Error(`Error getting rhs of unary: ${s}`);
-    return [{ op: token, right: ast }, rest];
+    return [{ op: token.value, right: ast }, rest];
   }
 
   return [null, s];
@@ -106,7 +106,7 @@ let parseOnce = (
   if (!left) {
     // ensures infix not treated as prefix
     if (rest.length == 0) throw new Error("Unexpected end of input.");
-    if (rest[0].value === "(") return parseOnce(left, "(", rest.slice(1));
+    if (rest[0].type === "open") return parseOnce(left, "(", rest.slice(1));
     // console.log(`before atom: ${left}`);
     [left, rest] = parseAtom(rest);
     // console.log(`after atom: ${left}`);
@@ -117,7 +117,7 @@ let parseOnce = (
     return parseOnce(left, operator, rest);
   }
 
-  if (rest[0].value === ")") return [left, rest.slice(1)];
+  if (rest[0].type === "close") return [left, rest.slice(1)];
 
   if (left) [left, operator, rest] = parseInfix(left, operator, rest);
 
