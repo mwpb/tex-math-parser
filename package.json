@@ -1,7 +1,7 @@
 {
-  "name": "tex-ast",
+  "name": "tex-math-parser",
   "version": "0.0.1",
-  "description": "Shunting yard algorithm to parse LaTeX mathematics",
+  "description": "Pratt parser for TeX math mode",
   "main": "index.js",
   "scripts": {
     "test": "jest"
@@ -12,8 +12,9 @@
     "parse",
     "parser",
     "mathematics",
-    "shunting",
-    "yard"
+    "Pratt",
+    "math",
+    "maths"
   ],
   "author": "Matthew Burke",
   "license": "MIT",
