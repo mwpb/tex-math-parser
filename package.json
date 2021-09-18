@@ -1,5 +1,5 @@
 {
-  "name": "tex-math-parser",
+  "name": "tex-math-ast",
   "version": "0.0.1",
   "description": "Pratt parser for TeX math mode",
   "main": "index.js",
@@ -14,7 +14,8 @@
     "mathematics",
     "Pratt",
     "math",
-    "maths"
+    "maths",
+    "ast"
   ],
   "author": "Matthew Burke",
   "license": "MIT",
