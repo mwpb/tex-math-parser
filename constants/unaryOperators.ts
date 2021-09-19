@@ -1,1 +1,2 @@
-export let unaryOperators = ["+", "-", "\\neg", "!", "\\#"];
+export let unaryPrefixOperators = ["+", "-", "\\neg", "\\#"];
+export let unaryPostfixOperators = ["!"];
