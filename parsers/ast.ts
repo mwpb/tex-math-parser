@@ -10,14 +10,14 @@ export type UnaryNode = {
   right: AST;
 };
 
-export const binaryPrefixSchema = Union(Literal("f"));
-export const binaryInfixSchema = Union(
-  Literal("+"),
-  Literal("-"),
-  Literal("*")
-);
-export const binaryOperatorSchema = binaryPrefixSchema.Or(binaryInfixSchema);
-export type BinaryOperator = Static<typeof binaryOperatorSchema>;
+// export const binaryPrefixSchema = Union(Literal("f"));
+// export const binaryInfixSchema = Union(
+//   Literal("+"),
+//   Literal("-"),
+//   Literal("*")
+// );
+// export const binaryOperatorSchema = binaryPrefixSchema.Or(binaryInfixSchema);
+// export type BinaryOperator = Static<typeof binaryOperatorSchema>;
 export type BinaryNode = {
   op: string;
   left: AST;

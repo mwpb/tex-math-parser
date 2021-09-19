@@ -94,6 +94,14 @@ test("init", () => {
         right: { op: "+", left: 3, right: 1 },
       },
     ],
+    [
+      "2<3",
+      {
+        op: "<",
+        left: 2,
+        right: 3,
+      },
+    ],
   ];
 
   for (let [input, output] of table) {

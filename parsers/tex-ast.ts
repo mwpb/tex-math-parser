@@ -1,13 +1,5 @@
-import { Lexer, Token } from "moo";
-import {
-  AST,
-  Atom,
-  binaryInfixSchema,
-  BinaryNode,
-  binaryPrefixSchema,
-  UnaryNode,
-  unaryOperatorSchema,
-} from "./ast";
+import { Token } from "moo";
+import { AST, Atom, BinaryNode, UnaryNode } from "./ast";
 import { operatorPrecedence } from "./precedence";
 import { tokeniser } from "./tokenise";
 
@@ -16,7 +8,6 @@ export let parse = (s: string): AST | null => {
   let rest = Array.from(tokeniser).filter(
     (x) => x.type !== "ws" && x.type !== "comma"
   );
-  // console.log(rest.map((x) => x.value));
 
   let left: AST | null = null;
   [left, rest] = parseOnce(null, " ", rest);
@@ -48,7 +39,7 @@ let parseAtom = (s: Token[]): [Atom | null, Token[]] => {
 let parseUnaryPrefix = (s: Token[]): [UnaryNode | null, Token[]] => {
   // console.log(`parse unary ${s}`);
   let token = s[0];
-  if (token.type === "unaryOperator") {
+  if (token.type === "unaryOperator" || token.type === "binaryUnary") {
     let [ast, rest] = parseOnce(null, token.value, s.slice(1));
     if (!ast) throw new Error(`Error getting rhs of unary: ${s}`);
     return [{ op: token.value, right: ast }, rest];
@@ -58,15 +49,15 @@ let parseUnaryPrefix = (s: Token[]): [UnaryNode | null, Token[]] => {
 };
 
 let parseBinaryPrefix = (s: Token[]): [BinaryNode | null, Token[]] => {
-  let token = s[0].value;
-  if (binaryPrefixSchema.guard(token)) {
-    let [left, rest] = parseOnce(null, token, s.slice(1));
+  let token = s[0];
+  if (token.type === "binary" || token.type === "binaryUnary") {
+    let [left, rest] = parseOnce(null, token.value, s.slice(1));
     if (!left) throw new Error(`Error getting lhs of binary prefix: ${s}`);
 
-    let [right, newRest] = parseOnce(null, token, rest);
+    let [right, newRest] = parseOnce(null, token.value, rest);
     if (!right) throw new Error(`Error getting rhs of binary prefix: ${s}`);
 
-    return [{ op: token, left: left, right: right }, newRest];
+    return [{ op: token.value, left: left, right: right }, newRest];
   }
 
   return [null, s];
@@ -78,18 +69,19 @@ let parseInfix = (
   s: Token[]
 ): [AST | null, string, Token[]] => {
   // console.log(`parse infix ${JSON.stringify(left)}, ${operator}, ${s}`);
-  let token = s[0].value;
+  let token = s[0];
   let currentPrecedence = operatorPrecedence.get(operator) ?? 0;
-  let tokenPrecedence = operatorPrecedence.get(token) ?? 0;
+  let tokenPrecedence = operatorPrecedence.get(token.value) ?? 0;
 
   if (tokenPrecedence <= currentPrecedence) {
     return [left, " ", s]; // use " " because we want token to bind next
   }
 
-  if (binaryInfixSchema.guard(token)) {
-    let [right, rest] = parseOnce(null, token, s.slice(1));
-    if (!right) throw new Error(`Error parsing rhs of binary ${token}: ${s}`);
-    return [{ op: token, left: left, right: right }, " ", rest];
+  if (token.type === "binary" || token.type === "binaryUnary") {
+    let [right, rest] = parseOnce(null, token.value, s.slice(1));
+    if (!right)
+      throw new Error(`Error parsing rhs of binary ${token.value}: ${s}`);
+    return [{ op: token.value, left: left, right: right }, " ", rest];
   }
 
   return [null, " ", s];
