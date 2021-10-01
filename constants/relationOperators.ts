@@ -1,4 +1,4 @@
-export let relationOperators = [
+export const relationOperators = [
   "<",
   ">",
   "\\nless",

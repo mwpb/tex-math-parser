@@ -39,7 +39,7 @@ let parseAtom = (s: Token[]): [Atom | null, Token[]] => {
 let parseUnaryPrefix = (s: Token[]): [UnaryNode | null, Token[]] => {
   // console.log(`parse unary ${s}`);
   let token = s[0];
-  if (token.type === "unaryOperator" || token.type === "binaryUnary") {
+  if (token.type === "unary" || token.type === "binaryUnary") {
     let [ast, rest] = parseOnce(null, token.value, s.slice(1));
     if (!ast) throw new Error(`Error getting rhs of unary: ${s}`);
     return [{ op: token.value, right: ast }, rest];

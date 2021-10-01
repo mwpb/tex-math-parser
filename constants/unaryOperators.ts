@@ -1,3 +1,3 @@
-export let binaryUnaryPrefix = ["+", "-"];
-export let unaryPrefixOperators = ["\\neg", "\\#"];
-export let unaryPostfixOperators = ["!"];
+export const binaryUnaryPrefix = ["+", "-"];
+export const unaryPrefixOperators = ["\\neg", "\\#"];
+export const unaryPostfixOperators = ["!"];

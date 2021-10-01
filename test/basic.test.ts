@@ -115,6 +115,17 @@ test("init", () => {
         right: 3,
       },
     ],
+    [
+      "\\coth(4) \\sqsupseteq 3",
+      {
+        op: "\\sqsupseteq",
+        left: {
+          op: "\\coth",
+          right: 4,
+        },
+        right: 3,
+      },
+    ],
   ];
 
   for (let [input, output] of table) {
