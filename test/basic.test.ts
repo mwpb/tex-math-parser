@@ -103,6 +103,18 @@ test("init", () => {
         right: 3,
       },
     ],
+    [
+      "f(3, 4) \\sqsupseteq 3",
+      {
+        op: "\\sqsupseteq",
+        left: {
+          op: "f",
+          left: 3,
+          right: 4,
+        },
+        right: 3,
+      },
+    ],
   ];
 
   for (let [input, output] of table) {
