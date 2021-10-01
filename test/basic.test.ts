@@ -77,6 +77,7 @@ test("init", () => {
       },
     ],
     ["f(2)(3)", { op: "f", left: 2, right: 3 }],
+    ["f{2}{3}", { op: "f", left: 2, right: 3 }],
     ["f(2, 3)", { op: "f", left: 2, right: 3 }],
     [
       "\\Delta*(\\alpha+\\beta)",
