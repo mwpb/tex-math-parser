@@ -4,7 +4,9 @@
   "description": "Pratt parser for TeX math mode",
   "main": "index.js",
   "scripts": {
-    "test": "jest"
+    "test": "jest",
+    "build": "tsc --noEmit && npx ./esbuild.js",
+    "watch": "concurrently \"tsc --watch --noEmit\" \"npx ./esbuild.js dev\""
   },
   "keywords": [
     "tex",
@@ -21,12 +23,16 @@
   "license": "MIT",
   "devDependencies": {
     "@types/jest": "^26.0.23",
+    "@types/katex": "^0.11.1",
     "@types/moo": "^0.5.5",
+    "concurrently": "^6.3.0",
+    "esbuild": "^0.13.3",
     "jest": "^27.0.6",
     "ts-jest": "^27.0.3",
     "typescript": "^4.3.5"
   },
   "dependencies": {
+    "katex": "^0.13.18",
     "moo": "^0.5.1",
     "runtypes": "^6.3.1"
   }

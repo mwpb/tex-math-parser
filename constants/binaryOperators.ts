@@ -34,4 +34,7 @@ export const binaryOperators = [
   "\\circ",
   "\\setminus",
   "\\amalg",
+
+  // Custom
+  "\\frac",
 ];

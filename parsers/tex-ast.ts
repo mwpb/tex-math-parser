@@ -1,6 +1,6 @@
 import { Token } from "moo";
 import { AST, Atom, BinaryNode, UnaryNode } from "./ast";
-import { operatorPrecedence } from "./precedence";
+import { getPrecedence, operatorPrecedence } from "./precedence";
 import { tokeniser } from "./tokenise";
 
 export let parse = (s: string): AST | null => {
@@ -10,9 +10,9 @@ export let parse = (s: string): AST | null => {
   );
 
   let left: AST | null = null;
-  [left, rest] = parseOnce(null, " ", rest);
+  [left, rest] = parseOnce(null, null, rest);
   while (rest.length > 0) {
-    [left, rest] = parseOnce(left, " ", rest);
+    [left, rest] = parseOnce(left, null, rest);
   }
 
   return left;
@@ -21,7 +21,7 @@ export let parse = (s: string): AST | null => {
 let parseAtom = (s: Token[]): [Atom | null, Token[]] => {
   // console.log(`parse atom ${s}`);
   let token = s[0];
-  if (token.type === "number") {
+  if (token.type === "number" || token.type === "integer") {
     return [Number.parseInt(token.value), s.slice(1)];
   }
   if (token.type === "symbol") {
@@ -40,7 +40,7 @@ let parseUnaryPrefix = (s: Token[]): [UnaryNode | null, Token[]] => {
   // console.log(`parse unary ${s}`);
   let token = s[0];
   if (token.type === "unary" || token.type === "binaryUnary") {
-    let [ast, rest] = parseOnce(null, token.value, s.slice(1));
+    let [ast, rest] = parseOnce(null, token, s.slice(1));
     if (!ast) throw new Error(`Error getting rhs of unary: ${s}`);
     return [{ op: token.value, right: ast }, rest];
   }
@@ -51,10 +51,10 @@ let parseUnaryPrefix = (s: Token[]): [UnaryNode | null, Token[]] => {
 let parseBinaryPrefix = (s: Token[]): [BinaryNode | null, Token[]] => {
   let token = s[0];
   if (token.type === "binary" || token.type === "binaryUnary") {
-    let [left, rest] = parseOnce(null, token.value, s.slice(1));
+    let [left, rest] = parseOnce(null, token, s.slice(1));
     if (!left) throw new Error(`Error getting lhs of binary prefix: ${s}`);
 
-    let [right, newRest] = parseOnce(null, token.value, rest);
+    let [right, newRest] = parseOnce(null, token, rest);
     if (!right) throw new Error(`Error getting rhs of binary prefix: ${s}`);
 
     return [{ op: token.value, left: left, right: right }, newRest];
@@ -65,31 +65,30 @@ let parseBinaryPrefix = (s: Token[]): [BinaryNode | null, Token[]] => {
 
 let parseInfix = (
   left: AST,
-  operator: string,
+  operator: Token | null,
   s: Token[]
-): [AST | null, string, Token[]] => {
-  // console.log(`parse infix ${JSON.stringify(left)}, ${operator}, ${s}`);
+): [AST | null, Token | null, Token[]] => {
+  // console.log(`parse infix ${JSON.stringify(left)}, ${s} with op: ${operator}`);
   let token = s[0];
-  let currentPrecedence = operatorPrecedence.get(operator) ?? 0;
-  let tokenPrecedence = operatorPrecedence.get(token.value) ?? 0;
+  let currentPrecedence = getPrecedence(operator);
+  let tokenPrecedence = getPrecedence(token);
 
   if (tokenPrecedence <= currentPrecedence) {
-    return [left, " ", s]; // use " " because we want token to bind next
+    return [left, null, s]; // use " " because we want token to bind next
   }
 
   if (token.type === "binary" || token.type === "binaryUnary") {
-    let [right, rest] = parseOnce(null, token.value, s.slice(1));
-    if (!right)
-      throw new Error(`Error parsing rhs of binary ${token.value}: ${s}`);
-    return [{ op: token.value, left: left, right: right }, " ", rest];
+    let [right, rest] = parseOnce(null, token, s.slice(1));
+    if (!right) throw Error(`Error parsing rhs of binary ${token.value}: ${s}`);
+    return [{ op: token.value, left: left, right: right }, null, rest];
   }
 
-  return [null, " ", s];
+  return [null, null, s];
 };
 
 let parseOnce = (
   left: AST | null,
-  operator: string,
+  operator: Token | null,
   rest: Token[]
 ): [AST | null, Token[]] => {
   // console.log(`parse once ${JSON.stringify(left)} ${operator} ${rest}`);
@@ -98,7 +97,7 @@ let parseOnce = (
   if (!left) {
     // ensures infix not treated as prefix
     if (rest.length == 0) throw new Error("Unexpected end of input.");
-    if (rest[0].type === "open") return parseOnce(left, "(", rest.slice(1));
+    if (rest[0].type === "open") return parseOnce(left, rest[0], rest.slice(1));
     // console.log(`before atom: ${left}`);
     [left, rest] = parseAtom(rest);
     // console.log(`after atom: ${left}`);
@@ -113,7 +112,7 @@ let parseOnce = (
 
   if (left) [left, operator, rest] = parseInfix(left, operator, rest);
 
-  if (!left) throw new Error(`Expected infix or delimiter: ${rest}`);
+  if (!left) throw new Error(`Expected infix or delimiter: ${left} ${operator} ${rest}`);
 
   return [left, rest];
 };

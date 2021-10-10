@@ -126,6 +126,14 @@ test("init", () => {
         right: 3,
       },
     ],
+    [
+      "1/2",
+      {
+        op: "/",
+        left: 1,
+        right: 2,
+      },
+    ],
   ];
 
   for (let [input, output] of table) {
