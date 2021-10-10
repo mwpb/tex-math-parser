@@ -18,6 +18,7 @@ export let getPrecedence = (token: Token | null): number => {
   if (token.type === "number" || token.type === "integer") {
     return 0;
   }
+  if (token.type === "open") return 0;
 
   let precedence = operatorPrecedence.get(token.value) ?? null;
   if (precedence === null) throw `Precedence for ${token.value} not found`;
