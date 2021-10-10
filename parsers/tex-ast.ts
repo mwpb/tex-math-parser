@@ -22,7 +22,7 @@ let parseAtom = (s: Token[]): [Atom | null, Token[]] => {
   // console.log(`parse atom ${s}`);
   let token = s[0];
   if (token.type === "number" || token.type === "integer") {
-    return [Number.parseInt(token.value), s.slice(1)];
+    return [Number.parseFloat(token.value), s.slice(1)];
   }
   if (token.type === "symbol") {
     return [token.value, s.slice(1)];

@@ -13954,7 +13954,7 @@
     ],
     binary: ["*", "f", ...relationOperators, ...binaryOperators, "/"],
     integer: /0|[1-9][0-9]*/,
-    number: /^[-+]?[0-9]+\.[0-9]+$/,
+    number: /^\d+\.?\d+$/,
     symbol: greekLetters,
     open: leftDelimiters,
     close: rightDelimiters,
